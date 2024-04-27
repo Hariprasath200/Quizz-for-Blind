@@ -1,0 +1,66 @@
+<!-- accounts/templates/register.html -->
+{% extends 'game/layouts/main.html' %}
+
+{% block title %}
+    Register
+{% endblock title %} 
+
+{% block content %}
+<div class="container">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Register</button>
+    </form>
+</div>
+<style>
+    /* accounts/static/accounts/styles.css */
+
+/* Center the form */
+form {
+    width: 300px;
+    margin: 0 auto;
+}
+
+/* Style form inputs and buttons */
+input[type="text"],
+input[type="password"],
+button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Style form container */
+.container {
+    padding: 16px;
+}
+
+/* Style form labels */
+label {
+    margin-bottom: 10px;
+    display: block;
+    font-weight: bold;
+}
+
+/* Style form errors */
+.error-message {
+    color: red;
+    font-size: 14px;
+}
+
+</style>
+{% endblock content %}

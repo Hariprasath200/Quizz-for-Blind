@@ -1,0 +1,30 @@
+<!-- game/templates/home.html -->
+{% extends 'game/layouts/main.html' %}
+
+{% block title %}
+    Home
+{% endblock title %} 
+
+{% block content %}
+<style>
+    body {
+        background-image: url('static/image/home.jpg'); /* Replace 'path_to_your_image.jpg' with the actual path to your image */
+        background-size:100%; 
+        /* Adjust the background image size */
+    }
+    
+</style>
+
+
+<div class="container">
+    <p style="margin-left: 0%;color: aqua;font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;font-size:3.6em ;">Welcome to the Disabilitie's Game</h1>
+    <p style="margin-left: 25%;color: rgb(252, 0, 239);font-size:1.6em ;">If you already have an account, you can login:</p>
+    <a href="{% url 'login' %}" class="btn btn-primary" style="margin-left: 40%;width: 20%;">Login</a>
+    
+</div>
+<div>
+    <h3 style="margin-left: 25%;color: rgb(219, 0, 0);font-size:1.6em ;">If you're new here, you can register now:</p>
+        <a href="{% url 'register' %}" class="btn btn-primary" style="margin-left: 22%;width: 23%;">Register</a>
+       
+</div>
+{% endblock content %}

@@ -1,0 +1,220 @@
+{% extends 'game/layouts/main.html' %}
+
+{% block title %}
+Game
+{% endblock title %} 
+
+{% block content %}
+<style>
+    body {
+    /* Set the background image */
+    background-image: url('static/image/th.jpg');
+    background-size:115%;
+    
+}
+</style>
+<br><br>
+<div id="quizForm" style="display: none; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 10px; box-shadow: 0 0 10px rgba(255, 7, 7, 0.959);opacity: 80%;">
+    <h2 style="text-align: center; font-size: 24px; color: #3300ec;">Quiz</h2>
+    <form id="quizForm" action="{% url 'submit_quiz' %}" method="post">
+        {% csrf_token %}
+        {% for question in questions %}
+            <div class="question" style="margin-bottom: 20px;">
+                <h3 id="question{{ question.id }}" aria-label="Question {{ forloop.counter }}: {{ question.text }}">{{ question.text }}</h3>
+                <ul style="list-style-type: none; padding: 0;">
+                    {% for answer in question.answer_set.all %}
+                        <li style="margin-bottom: 10px;">
+                            <input type="radio" id="answer{{ answer.id }}" name="question_{{ question.id }}" value="{{ answer.id }}" aria-labelledby="question{{ question.id }}">
+                            <label for="answer{{ answer.id }}" aria-describedby="answerDescription{{ answer.id }}">{{ answer.text }}</label>
+                            <!-- Add a description for each answer -->
+                            <span id="answerDescription{{ answer.id }}" style="display: none;">Answer: {{ answer.text }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+        
+        <button id="nextButton" type="button" style="display: block; margin: 0 auto; padding: 10px 20px; font-size: 18px; background-color: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;">Next</button>
+        <button id="submitButton" type="submit" style="display: none; margin: 0 auto; padding: 10px 20px; font-size: 18px; background-color: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;">Submit Quiz</button>
+    </form>
+    
+    <script>
+        var currentQuestionIndex = 0;
+        var questions = document.querySelectorAll('.question');
+    
+        function showQuestion(index) {
+            questions.forEach(function(question, i) {
+                if (i === index) {
+                    question.style.display = 'block';
+                } else {
+                    question.style.display = 'none';
+                }
+            });
+            
+            // Show/hide buttons based on current question index
+            if (index === 0) {
+                document.getElementById('nextButton').style.display = 'block';
+                document.getElementById('submitButton').style.display = 'none';
+            } else if (index === questions.length - 1) {
+                document.getElementById('nextButton').style.display = 'none';
+                document.getElementById('submitButton').style.display = 'block';
+            } else {
+                document.getElementById('nextButton').style.display = 'block';
+                document.getElementById('submitButton').style.display = 'none';
+            }
+        }
+    
+        function showNextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                showQuestion(currentQuestionIndex);
+                readQuiz(currentQuestionIndex); // Read out the current question
+            }
+        }
+    
+        document.getElementById('nextButton').addEventListener('click', showNextQuestion);
+    
+        // Show the first question initially
+        showQuestion(0);
+    </script>
+    
+    
+</div>
+
+<!-- Start Game Button -->
+<div id="startGameButton" style="text-align: center; margin-top: 20px;">
+    <button onclick="startQuiz()" style="padding: 10px 20px; font-size: 18px; background-color: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.3s;">Start Game</button>
+</div>
+
+<!-- Countdown Timer -->
+<div id="countdown" style="display: none; text-align: center; margin-top: 20px;">
+    <h3 id="countdownDisplay"></h3>
+</div>
+
+<audio id="countdownSound">
+    <source src="static/321.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+<!-- Include the following script in your HTML file -->
+
+<script>
+    function startQuiz() {
+        var countdownDisplay = document.getElementById("countdownDisplay");
+        var countdownSound = document.getElementById("countdownSound");
+        var startGameButton = document.getElementById("startGameButton");
+
+        startGameButton.style.display = "none"; // Hide the Start Game button
+
+        var countdown = 4; // Initial value is 4 for the "Go" message
+        countdownDisplay.textContent = "3";
+        countdownSound.play();
+
+        var countdownInterval = setInterval(function() {
+            countdown--;
+            if (countdown > 1) {
+                countdownDisplay.textContent = countdown - 1; // Display "3 2 1" after "Go"
+                countdownSound.play();
+            } else if (countdown == 1) {
+                countdownDisplay.textContent = "Go!";
+                countdownSound.play();
+            } else {
+                clearInterval(countdownInterval);
+                document.getElementById("countdown").style.display = "none";
+                document.getElementById("quizForm").style.display = "block"; // Show the quiz form after countdown
+                readQuiz(0); // Read out the first question after the countdown finishes
+            }
+        }, 1000);
+
+        document.getElementById("countdown").style.display = "block";
+    }
+
+    // Function to read out a specific question using text-to-speech
+    function readQuiz(index) {
+        var question = questions[index];
+        var quizText = question.querySelector('h3').textContent + " "; // Add the question text
+        var answerOptions = question.querySelectorAll('input[type=radio] + label');
+        answerOptions.forEach(function(option) {
+            quizText += option.textContent + " "; // Add each answer option
+        });
+
+        var utterance = new SpeechSynthesisUtterance(quizText);
+        
+        // Set the rate to a slower value (e.g., 0.8 for 80% of the normal speed)
+        utterance.rate = 0.5;
+
+        speechSynthesis.speak(utterance);
+    }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<div class="card">
+    <div class="card-body">
+        <button id="start-recognition" class="btn btn-primary">Start Recognition</button>
+        <p id="recognized-text"></p>
+    </div>
+    <style>
+        .card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+}
+
+#recognized-text {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+    </style>
+</div>
+<script>
+    document.getElementById('start-recognition').addEventListener('click', function() {
+        // Make AJAX request to speech_to_text view
+        fetch("{% url 'speech_to_text' %}", {
+            method: 'POST',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.text) {
+                document.getElementById('recognized-text').textContent =   data.text;
+            } else if (data.error) {
+                document.getElementById('recognized-text').textContent = "Error: " + data.error;
+            } else {
+                document.getElementById('recognized-text').textContent = "Unknown error occurred.";
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+</script>
+{% endblock content %}
